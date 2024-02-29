@@ -43,6 +43,8 @@
 #include "xeus-python/xeus_python_config.hpp"
 #include "xeus-python/xutils.hpp"
 
+#include <iostream>
+
 namespace py = pybind11;
 
 // Global variable to hold the lambda state
@@ -206,41 +208,50 @@ int main(int argc, char* argv[])
             " the " + connection_filename + " file."
             << std::endl;
 
-        // py::gil_scoped_release* release = new py::gil_scoped_release();
-        kernel.start();
-        // std::cout << "Kernel started\n";
-    }
-    else
-    {
-        xeus::xkernel kernel(xeus::get_user_name(),
-                             std::move(context),
-                             std::move(interpreter),
-                             make_uv_server,
-                             std::move(hist));
-                            //  xpyt::make_python_debugger,
-                            //  debugger_config);
-
-        const auto& config = kernel.get_config();
-        std::clog <<
-            "Starting xeus-python kernel...\n\n"
-            "If you want to connect to this kernel from an other client, just copy"
-            " and paste the following content inside of a `kernel.json` file. And then run for example:\n\n"
-            "# jupyter console --existing kernel.json\n\n"
-            "kernel.json\n```\n{\n"
-            "    \"transport\": \"" + config.m_transport + "\",\n"
-            "    \"ip\": \"" + config.m_ip + "\",\n"
-            "    \"control_port\": " + config.m_control_port + ",\n"
-            "    \"shell_port\": " + config.m_shell_port + ",\n"
-            "    \"stdin_port\": " + config.m_stdin_port + ",\n"
-            "    \"iopub_port\": " + config.m_iopub_port + ",\n"
-            "    \"hb_port\": " + config.m_hb_port + ",\n"
-            "    \"signature_scheme\": \"" + config.m_signature_scheme + "\",\n"
-            "    \"key\": \"" + config.m_key + "\"\n"
-            "}\n```"
-            << std::endl;
 
         kernel.start();
+        std::cout<<"loop run forever\n";
+        py::gil_scoped_acquire acquire;
+        py::exec(R"(
+            import asyncio
+            print("get loop")
+            loop = asyncio.get_event_loop()
+            print("run forever")
+            loop.run_forever()
+        )");
+        std::cout << "Kernel started\n";
     }
+    // else
+    // {
+    //     xeus::xkernel kernel(xeus::get_user_name(),
+    //                          std::move(context),
+    //                          std::move(interpreter),
+    //                          make_uv_server,
+    //                          std::move(hist));
+    //                         //  xpyt::make_python_debugger,
+    //                         //  debugger_config);
+
+    //     const auto& config = kernel.get_config();
+    //     std::clog <<
+    //         "Starting xeus-python kernel...\n\n"
+    //         "If you want to connect to this kernel from an other client, just copy"
+    //         " and paste the following content inside of a `kernel.json` file. And then run for example:\n\n"
+    //         "# jupyter console --existing kernel.json\n\n"
+    //         "kernel.json\n```\n{\n"
+    //         "    \"transport\": \"" + config.m_transport + "\",\n"
+    //         "    \"ip\": \"" + config.m_ip + "\",\n"
+    //         "    \"control_port\": " + config.m_control_port + ",\n"
+    //         "    \"shell_port\": " + config.m_shell_port + ",\n"
+    //         "    \"stdin_port\": " + config.m_stdin_port + ",\n"
+    //         "    \"iopub_port\": " + config.m_iopub_port + ",\n"
+    //         "    \"hb_port\": " + config.m_hb_port + ",\n"
+    //         "    \"signature_scheme\": \"" + config.m_signature_scheme + "\",\n"
+    //         "    \"key\": \"" + config.m_key + "\"\n"
+    //         "}\n```"
+    //         << std::endl;
+
+    //     kernel.start();
+    // }
 
     return 0;
 }

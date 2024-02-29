@@ -59,12 +59,12 @@ namespace xpyt
 
     void raw_interpreter::configure_impl()
     {
-        if (m_release_gil_at_startup)
-        {
-            // The GIL is not held by default by the interpreter, so every time we need to execute Python code we
-            // will need to acquire the GIL
-            m_release_gil = gil_scoped_release_ptr(new py::gil_scoped_release());
-        }
+        // if (m_release_gil_at_startup)
+        // {
+        //     // The GIL is not held by default by the interpreter, so every time we need to execute Python code we
+        //     // will need to acquire the GIL
+        //     m_release_gil = gil_scoped_release_ptr(new py::gil_scoped_release());
+        // }
 
         py::gil_scoped_acquire acquire;
 
